@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <GxEPD2_BW.h>
 #include <Fonts/FreeMonoBold9pt7b.h>
+#include "bitmap.h"
+#include "wifi.h"
 
 #define GxEPD2_DRIVER_CLASS GxEPD2_750_T7  // GDEW075T7   800x480, EK79655 (GD7965), (WFT0583CZ61)
 
@@ -17,9 +19,11 @@ void setup() {
   
   helloWorld();
   display.hibernate();
+
+  setupWifi();
 }
 
-const char HelloWorld[] = "Hello world!";
+const char HelloWorld[] = "Connect to WiFi!";
 
 void loop() {}
 
@@ -38,8 +42,10 @@ void helloWorld() {
   do
   {
     display.fillScreen(GxEPD_WHITE);
-    display.setCursor(x, y);
+    display.setCursor(x, y + 150);
     display.print(HelloWorld);
+
+    display.drawBitmap(x - 128, y - 128, wifiIcon, 128, 128, GxEPD_BLACK);
   }
   while (display.nextPage());
 }
