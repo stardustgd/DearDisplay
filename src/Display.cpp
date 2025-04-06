@@ -1,5 +1,5 @@
 #include "bitmap.h"
-#include "display.h"
+#include "Display.h"
 #include <Fonts/FreeMonoBold9pt7b.h>
 
 Display::Display(uint16_t width, uint16_t height)
@@ -10,10 +10,12 @@ void Display::init() {
 } 
 
 void Display::draw_wifi_screen() {
+    const char connect_message[] = "Connect to WiFi!";
     display.setRotation(0);
     display.setFont(&FreeMonoBold9pt7b);
     display.setTextColor(GxEPD_BLACK);
     int16_t tbx, tby; uint16_t tbw, tbh;
+    display.getTextBounds(connect_message, 0, 0, &tbx, &tby, &tbw, &tbh);
 
     // center the bounding box by transposition of the origin:
     uint16_t x = ((display.width() - tbw) / 2) - tbx;
@@ -26,8 +28,10 @@ void Display::draw_wifi_screen() {
       display.fillScreen(GxEPD_WHITE);
       display.setCursor(x, y + 150);
       display.print("Connect to WiFi!");
+
+      uint16_t bitmap_x = (display.width() - 128) / 2;
   
-      display.drawBitmap(x + 32, y - 64, wifiIcon, 128, 128, GxEPD_BLACK);
+      display.drawBitmap(bitmap_x, y - 64, wifiIcon, 128, 128, GxEPD_BLACK);
     }
     while (display.nextPage());
   

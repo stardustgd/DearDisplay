@@ -1,8 +1,5 @@
-#ifndef WIFI_H
-#define WIFI_H
+#pragma once
 
 #include <WiFiManager.h>
 
 void setupWifi();
-
-#endif
