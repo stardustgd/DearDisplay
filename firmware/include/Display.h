@@ -11,6 +11,8 @@ public:
 
     void draw_wifi_screen();
 
+    void draw_yui();
+
 private:
     GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT> display;
 };
