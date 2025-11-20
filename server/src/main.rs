@@ -16,9 +16,9 @@ async fn main() {
         .route("/", get(root))
         .route("/api/display", get(get_message));
 
-    info!("Running on localhost:3000");
+    info!("Running on localhost:4000");
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:4000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
