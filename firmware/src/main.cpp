@@ -2,11 +2,11 @@
 #include "Display.h"
 #include "wifi.h"
 
-Display displayController(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+Display displayController;
 
 void setup() {
-  Serial.println(115200);
-  delay(1000);
+  Serial.begin(SERIAL_BAUD_RATE);
+  delay(2000);
 
   Serial.println("initializing displayController");
   displayController.init();

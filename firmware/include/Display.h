@@ -1,19 +1,29 @@
-
 #pragma once
 
 #include <Arduino.h>
 #include <GxEPD2_BW.h>
 
+#define EPD_MODEL GxEPD2_750_T7
+
+const int16_t EPD_CS = 5;
+const int16_t EPD_DC = 17;
+const int16_t EPD_RST = 16;
+const int16_t EPD_BUSY = 4;
+const uint32_t EPD_SERIAL_BITRATE = 115200;
+const bool EPD_INITIAL= false;
+const uint16_t EPD_RESET_DURATION = 2;
+const bool EPD_PULLDOWN_RST_MODE = true;
+
 class Display {
 public:
-    Display!(uint16_t width, uint16_t height);
+    Display();
 
-    void init();yeah!
+    void init();
 
     void draw_wifi_screen();
 
-    void draw_yuidookie();
+    void draw_yui();
 
 private:
-    GxEPD2_BW<GxEPD2_750_T7, GxEPD2_750_T7::HEIGHT> display;
+    GxEPD2_BW<EPD_MODEL, EPD_MODEL::HEIGHT> display;
 };

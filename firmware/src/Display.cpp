@@ -2,11 +2,12 @@
 #include "Display.h"
 #include <Fonts/FreeMonoBold9pt7b.h>
 
-Display::Display(uint16_t width, uint16_t height)
-    : display(GxEPD2_750_T7(5, 17, 16, 4)) {}
+Display::Display()
+    : display(EPD_MODEL(EPD_CS, EPD_DC, EPD_RST, EPD_BUSY)) {}
 
 void Display::init() {
-  display.init(115200, true, 2, true);
+  display.init(EPD_SERIAL_BITRATE, EPD_INITIAL, EPD_RESET_DURATION, EPD_PULLDOWN_RST_MODE);
+  Serial.println("display initialized");
 } 
 
 void Display::draw_wifi_screen() {
