@@ -2,5 +2,4 @@
 
 #include <Arduino.h>
 
-#define DISPLAY_WIDTH 800
-#define DISPLAY_HEIGHT 480
+#define SERIAL_BAUD_RATE 115200
