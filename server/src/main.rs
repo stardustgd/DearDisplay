@@ -1,34 +1,24 @@
-use axum::{Json, Router, routing::get};
-use serde::Serialize;
+use axum::Router;
+use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
 
-#[derive(Serialize)]
-struct DisplayMessage {
-    status: u8,
-    message: String,
-}
+mod http;
+mod image;
 
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    let app = Router::new()
-        .route("/", get(root))
-        .route("/api/display", get(get_message));
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods(Any)
+        .allow_headers(Any);
+
+    let routes = Router::new().merge(http::display::routes()).layer(cors);
 
     info!("Running on localhost:4000");
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:4000").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
-}
 
-async fn root() -> &'static str {
-    "Hello world"
-}
-
-async fn get_message() -> Json<DisplayMessage> {
-    Json(DisplayMessage {
-        status: 200,
-        message: "Hello world".to_string(),
-    })
+    axum::serve(listener, routes).await.unwrap();
 }
