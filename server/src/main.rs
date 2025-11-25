@@ -3,6 +3,7 @@ use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
 
 mod http;
+mod image;
 
 #[tokio::main]
 async fn main() {

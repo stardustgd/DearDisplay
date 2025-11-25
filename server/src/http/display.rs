@@ -1,3 +1,4 @@
+use crate::image::image_to_bmp;
 use axum::{Json, Router, extract::Multipart, routing::get};
 use serde::Serialize;
 
@@ -21,9 +22,9 @@ async fn get_display() -> Json<DisplayMessage> {
 async fn post_display(mut multipart: Multipart) -> Json<DisplayMessage> {
     let mut image_bytes: Option<Vec<u8>> = None;
 
+    // Get image bytes
     while let Some(field) = multipart.next_field().await.unwrap() {
         let bytes = field.bytes().await.unwrap();
-
         tokio::fs::write("uploaded.png", &bytes).await.unwrap();
         image_bytes = Some(bytes.to_vec());
     }
@@ -35,22 +36,23 @@ async fn post_display(mut multipart: Multipart) -> Json<DisplayMessage> {
         });
     };
 
-    let image = image::load_from_memory(&image_bytes).expect("Invalid image");
+    // Convert image to bmp
+    let bmp_bytes = match image_to_bmp(&image_bytes) {
+        Ok(bytes) => bytes,
+        Err(err) => {
+            println!("error: {err}");
 
-    let mut bmp_buf = Vec::new();
+            return Json(DisplayMessage {
+                status: 400,
+                image_bmp: "".to_string(),
+            });
+        }
+    };
 
-    {
-        let mut cursor = std::io::Cursor::new(&mut bmp_buf);
-        image
-            .write_to(&mut cursor, image::ImageFormat::Bmp)
-            .expect("Failed to encode BMP")
-    }
+    tokio::fs::write("output.bmp", &bmp_bytes).await.unwrap();
 
-    tokio::fs::write("output.bmp", &bmp_buf)
-        .await
-        .expect("failed to write bmp");
-
-    let hex = bmp_buf
+    // Convert bmp to hex
+    let hex = bmp_bytes
         .iter()
         .map(|b| format!("{:02X}", b))
         .collect::<String>();
