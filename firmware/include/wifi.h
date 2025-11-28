@@ -1,3 +1,6 @@
 #pragma once
 
-void setupWifi();
+#include "config.h"
+#include <WiFiManager.h>
+
+bool setupWifi();
