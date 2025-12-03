@@ -45,11 +45,6 @@ void Display::drawWifiScreen() {
   
 }
 
-void Display::drawYui() {
-    prepareDisplay();
-    drawBitmap(0, 0, epd_bitmap_Yui_Hirasawa_new_mugshot, 800, 480);
-}
-
 void Display::drawText(const char* s) {
   int16_t tbx, tby; uint16_t tbw, tbh;
   display.getTextBounds(s, 0, 0, &tbx, &tby, &tbw, &tbh);
