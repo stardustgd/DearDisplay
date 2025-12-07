@@ -1,4 +1,4 @@
-use crate::image::image_to_bmp;
+use crate::image_processing::image_to_bmp;
 use axum::{Json, Router, extract::Multipart, routing::get};
 use serde::Serialize;
 
@@ -9,13 +9,13 @@ pub fn routes() -> Router {
 #[derive(Serialize)]
 struct DisplayMessage {
     status: u16,
-    image_bmp: String,
+    image_bmp: Vec<u8>,
 }
 
 async fn get_display() -> Json<DisplayMessage> {
     Json(DisplayMessage {
         status: 200,
-        image_bmp: "".to_string(),
+        image_bmp: vec![],
     })
 }
 
@@ -32,33 +32,15 @@ async fn post_display(mut multipart: Multipart) -> Json<DisplayMessage> {
     let Some(image_bytes) = image_bytes else {
         return Json(DisplayMessage {
             status: 400,
-            image_bmp: "".to_string(),
+            image_bmp: vec![],
         });
     };
 
     // Convert image to bmp
-    let bmp_bytes = match image_to_bmp(&image_bytes) {
-        Ok(bytes) => bytes,
-        Err(err) => {
-            println!("error: {err}");
-
-            return Json(DisplayMessage {
-                status: 400,
-                image_bmp: "".to_string(),
-            });
-        }
-    };
-
-    tokio::fs::write("output.bmp", &bmp_bytes).await.unwrap();
-
-    // Convert bmp to hex
-    let hex = bmp_bytes
-        .iter()
-        .map(|b| format!("{:02X}", b))
-        .collect::<String>();
+    let bmp_bytes = image_to_bmp(&image_bytes);
 
     Json(DisplayMessage {
         status: 200,
-        image_bmp: hex,
+        image_bmp: bmp_bytes,
     })
 }
