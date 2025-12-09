@@ -10,10 +10,7 @@ pub fn image_to_bmp(image_bytes: &[u8]) -> Vec<u8> {
         .unwrap()
         .resize_to_fill(800, 480, FilterType::Nearest);
 
-    let grayscale_image = image.to_luma8();
-
-    let mut grayscale_image =
-        image::imageops::resize(&grayscale_image, 800, 480, FilterType::Nearest);
+    let mut grayscale_image = image.to_luma8();
 
     image::imageops::dither(&mut grayscale_image, &BiLevel);
 
