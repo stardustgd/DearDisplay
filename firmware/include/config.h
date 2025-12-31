@@ -8,3 +8,5 @@
 
 #define TIME_TO_SLEEP 30
 #define uS_TO_S 1000000
+
+#define MAX_BUFFER_SIZE 48000
