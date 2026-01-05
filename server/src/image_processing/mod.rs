@@ -29,16 +29,18 @@ pub fn image_to_bin(image_bytes: &[u8]) -> Vec<u8> {
 fn pack_bytes(pixels: &[u8]) -> Vec<u8> {
     let mut packed = Vec::with_capacity((pixels.len() + 7) / 8);
 
-    for chunk in pixels.chunks(8) {
-        let mut byte = 0u8;
+    for _ in pixels.chunks(800) {
+        for chunk in pixels.chunks(8) {
+            let mut byte = 0u8;
 
-        for (i, &p) in chunk.iter().enumerate() {
-            if p > 0 {
-                byte |= 1 << (7 - i);
+            for (i, &p) in chunk.iter().enumerate() {
+                if p == 1 {
+                    byte |= 1 << (7 - i);
+                }
             }
-        }
 
-        packed.push(byte);
+            packed.push(byte);
+        }
     }
 
     packed

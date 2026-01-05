@@ -17,7 +17,6 @@ pub fn routes() -> Router {
 #[derive(Serialize)]
 struct DisplayMessage {
     status: u16,
-    image_bmp: Vec<u8>,
 }
 
 async fn get_display() -> impl IntoResponse {
@@ -40,7 +39,7 @@ async fn get_display() -> impl IntoResponse {
     Ok((headers, body))
 }
 
-async fn post_display(mut multipart: Multipart) -> Json<DisplayMessage> {
+async fn post_display(mut multipart: Multipart) -> impl IntoResponse {
     let mut image_bytes: Option<Vec<u8>> = None;
 
     // Get image bytes
@@ -51,10 +50,7 @@ async fn post_display(mut multipart: Multipart) -> Json<DisplayMessage> {
     }
 
     let Some(image_bytes) = image_bytes else {
-        return Json(DisplayMessage {
-            status: 400,
-            image_bmp: vec![],
-        });
+        return Json(DisplayMessage { status: 400 });
     };
 
     // Convert image to a format compatible with the e-ink display
@@ -62,8 +58,5 @@ async fn post_display(mut multipart: Multipart) -> Json<DisplayMessage> {
 
     tokio::fs::write("output.bin", &bin_bytes).await.unwrap();
 
-    Json(DisplayMessage {
-        status: 200,
-        image_bmp: bin_bytes,
-    })
+    Json(DisplayMessage { status: 200 })
 }
