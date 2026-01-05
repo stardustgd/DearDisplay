@@ -1,6 +1,14 @@
-use crate::image_processing::image_to_bmp;
-use axum::{Json, Router, extract::Multipart, routing::get};
+use crate::image_processing::image_to_bin;
+use axum::{
+    Json, Router,
+    body::Body,
+    extract::Multipart,
+    http::{StatusCode, header},
+    response::IntoResponse,
+    routing::get,
+};
 use serde::Serialize;
+use tokio_util::io::ReaderStream;
 
 pub fn routes() -> Router {
     Router::new().route("/api/display", get(get_display).post(post_display))
@@ -12,11 +20,24 @@ struct DisplayMessage {
     image_bmp: Vec<u8>,
 }
 
-async fn get_display() -> Json<DisplayMessage> {
-    Json(DisplayMessage {
-        status: 200,
-        image_bmp: vec![],
-    })
+async fn get_display() -> impl IntoResponse {
+    let file = match tokio::fs::File::open("output.bmp").await {
+        Ok(file) => file,
+        Err(err) => return Err((StatusCode::NOT_FOUND, format!("File not found: {}", err))),
+    };
+
+    let stream = ReaderStream::new(file);
+    let body = Body::from_stream(stream);
+
+    let headers = [
+        (header::CONTENT_TYPE, "text/plain; charset=UTF-8"),
+        (
+            header::CONTENT_DISPOSITION,
+            "inline; filename=\"output.bmp\"",
+        ),
+    ];
+
+    Ok((headers, body))
 }
 
 async fn post_display(mut multipart: Multipart) -> Json<DisplayMessage> {
@@ -36,11 +57,13 @@ async fn post_display(mut multipart: Multipart) -> Json<DisplayMessage> {
         });
     };
 
-    // Convert image to bmp
-    let bmp_bytes = image_to_bmp(&image_bytes);
+    // Convert image to a format compatible with the e-ink display
+    let bin_bytes = image_to_bin(&image_bytes);
+
+    tokio::fs::write("output.bin", &bin_bytes).await.unwrap();
 
     Json(DisplayMessage {
         status: 200,
-        image_bmp: bmp_bytes,
+        image_bmp: bin_bytes,
     })
 }
