@@ -21,7 +21,7 @@ struct DisplayMessage {
 }
 
 async fn get_display() -> impl IntoResponse {
-    let file = match tokio::fs::File::open("output.bmp").await {
+    let file = match tokio::fs::File::open("output.bin").await {
         Ok(file) => file,
         Err(err) => return Err((StatusCode::NOT_FOUND, format!("File not found: {}", err))),
     };
@@ -33,7 +33,7 @@ async fn get_display() -> impl IntoResponse {
         (header::CONTENT_TYPE, "text/plain; charset=UTF-8"),
         (
             header::CONTENT_DISPOSITION,
-            "inline; filename=\"output.bmp\"",
+            "inline; filename=\"output.bin\"",
         ),
     ];
 
