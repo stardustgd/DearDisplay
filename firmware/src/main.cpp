@@ -29,7 +29,9 @@ void setup() {
 
   uint8_t* buf = new uint8_t[MAX_BUFFER_SIZE];
 
-  if (getImage("http://tmpfiles.org/dl/17948760/output.bin", buf)) {
+  const char* API_URL = BASE_URL API_PATH;
+
+  if (getImage(API_URL, buf)) {
     displayController.drawBitmap(0, 0, buf, 800, 480, GxEPD_BLACK);
   }
 

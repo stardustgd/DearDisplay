@@ -10,3 +10,6 @@
 #define uS_TO_S 1000000
 
 #define MAX_BUFFER_SIZE 48000
+
+#define BASE_URL "http://192.168.1.199:4000/"
+#define API_PATH "api/display"
