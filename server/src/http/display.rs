@@ -3,7 +3,7 @@ use axum::{
     Json, Router,
     body::Body,
     extract::Multipart,
-    http::{StatusCode, header},
+    http::{HeaderMap, HeaderValue, StatusCode, header},
     response::IntoResponse,
     routing::get,
 };
@@ -25,16 +25,26 @@ async fn get_display() -> impl IntoResponse {
         Err(err) => return Err((StatusCode::NOT_FOUND, format!("File not found: {}", err))),
     };
 
+    let file_metadata = file.metadata().await.unwrap();
+    let file_length = file_metadata.len().to_string();
+
     let stream = ReaderStream::new(file);
     let body = Body::from_stream(stream);
 
-    let headers = [
-        (header::CONTENT_TYPE, "text/plain; charset=UTF-8"),
-        (
-            header::CONTENT_DISPOSITION,
-            "inline; filename=\"output.bin\"",
-        ),
-    ];
+    let mut headers = HeaderMap::new();
+
+    headers.insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_static("text/plain; charset=UTF-8"),
+    );
+    headers.insert(
+        header::CONTENT_LENGTH,
+        HeaderValue::from_str(&file_length).unwrap(),
+    );
+    headers.insert(
+        header::CONTENT_DISPOSITION,
+        HeaderValue::from_static("inline; filename=\"output.bin\""),
+    );
 
     Ok((headers, body))
 }
