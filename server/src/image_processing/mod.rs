@@ -5,10 +5,11 @@ use image::{
 
 use std::io::Cursor;
 
-pub fn image_to_bmp(image_bytes: &[u8]) -> Vec<u8> {
-    let image = image::load_from_memory(&image_bytes)
-        .unwrap()
-        .resize_to_fill(800, 480, FilterType::Nearest);
+pub fn image_to_bin(image_bytes: &[u8]) -> Vec<u8> {
+    let image =
+        image::load_from_memory(&image_bytes)
+            .unwrap()
+            .resize_exact(800, 480, FilterType::Nearest);
 
     let mut grayscale_image = image.to_luma8();
 
@@ -19,7 +20,40 @@ pub fn image_to_bmp(image_bytes: &[u8]) -> Vec<u8> {
         eprintln!("Failed to write to filesystem: {}", e);
     });
 
-    grayscale_image.into_raw()
+    pack_bytes(&grayscale_image)
+}
+
+// Convert 1 byte/pixel to 8 pixels/byte
+fn pack_bytes(img: &ImageBuffer<Luma<u8>, Vec<u8>>) -> Vec<u8> {
+    let (width, height) = img.dimensions();
+    let mut res = Vec::with_capacity((width * height / 8) as usize);
+
+    for y in 0..height {
+        let mut byte = 0u8;
+        let mut bit = 7;
+
+        for x in 0..width {
+            let pixel = img.get_pixel(x, y)[0];
+
+            if pixel < 128 {
+                byte |= 1 << bit;
+            }
+
+            if bit == 0 {
+                res.push(byte);
+                byte = 0;
+                bit = 7;
+            } else {
+                bit -= 1;
+            }
+        }
+
+        if bit != 7 {
+            res.push(byte);
+        }
+    }
+
+    res
 }
 
 fn bmp_to_fs(image: &ImageBuffer<Luma<u8>, Vec<u8>>) -> ImageResult<()> {
