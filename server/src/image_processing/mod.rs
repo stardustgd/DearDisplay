@@ -1,23 +1,31 @@
-use image::{ImageBuffer, ImageFormat, ImageResult, Luma, imageops::FilterType};
+use image::{
+    ImageBuffer, ImageFormat, ImageResult, Luma,
+    imageops::{BiLevel, FilterType},
+};
 
 use std::io::Cursor;
 
 pub fn image_to_bin(image_bytes: &[u8]) -> Vec<u8> {
-    let image = image::load_from_memory(&image_bytes)
-        .unwrap()
-        .resize_exact(800, 480, FilterType::Nearest)
-        .to_luma8();
+    let image =
+        image::load_from_memory(&image_bytes)
+            .unwrap()
+            .resize_exact(800, 480, FilterType::Nearest);
+    // .to_luma8();
 
-    let mut img = image.clone();
+    let mut grayscale_image = image.to_luma8();
 
-    floyd_steinberg(&mut img);
+    image::imageops::dither(&mut grayscale_image, &BiLevel);
+
+    // let mut img = image.clone();
+    //
+    // floyd_steinberg(&mut img);
 
     // Write to fs for debugging
-    bmp_to_fs(&img).unwrap_or_else(|e| {
+    bmp_to_fs(&grayscale_image).unwrap_or_else(|e| {
         eprintln!("Failed to write to filesystem: {}", e);
     });
 
-    pack_bytes(&img)
+    pack_bytes(&grayscale_image)
 }
 
 // Source: https://en.wikipedia.org/wiki/Floyd%E2%80%93Steinberg_dithering
