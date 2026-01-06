@@ -3,7 +3,7 @@ use axum::{
     Json, Router,
     body::Body,
     extract::Multipart,
-    http::{StatusCode, header},
+    http::{HeaderMap, HeaderValue, StatusCode, header},
     response::IntoResponse,
     routing::get,
 };
@@ -17,7 +17,6 @@ pub fn routes() -> Router {
 #[derive(Serialize)]
 struct DisplayMessage {
     status: u16,
-    image_bmp: Vec<u8>,
 }
 
 async fn get_display() -> impl IntoResponse {
@@ -26,21 +25,31 @@ async fn get_display() -> impl IntoResponse {
         Err(err) => return Err((StatusCode::NOT_FOUND, format!("File not found: {}", err))),
     };
 
+    let file_metadata = file.metadata().await.unwrap();
+    let file_length = file_metadata.len().to_string();
+
     let stream = ReaderStream::new(file);
     let body = Body::from_stream(stream);
 
-    let headers = [
-        (header::CONTENT_TYPE, "text/plain; charset=UTF-8"),
-        (
-            header::CONTENT_DISPOSITION,
-            "inline; filename=\"output.bin\"",
-        ),
-    ];
+    let mut headers = HeaderMap::new();
+
+    headers.insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_static("text/plain; charset=UTF-8"),
+    );
+    headers.insert(
+        header::CONTENT_LENGTH,
+        HeaderValue::from_str(&file_length).unwrap(),
+    );
+    headers.insert(
+        header::CONTENT_DISPOSITION,
+        HeaderValue::from_static("inline; filename=\"output.bin\""),
+    );
 
     Ok((headers, body))
 }
 
-async fn post_display(mut multipart: Multipart) -> Json<DisplayMessage> {
+async fn post_display(mut multipart: Multipart) -> impl IntoResponse {
     let mut image_bytes: Option<Vec<u8>> = None;
 
     // Get image bytes
@@ -51,10 +60,7 @@ async fn post_display(mut multipart: Multipart) -> Json<DisplayMessage> {
     }
 
     let Some(image_bytes) = image_bytes else {
-        return Json(DisplayMessage {
-            status: 400,
-            image_bmp: vec![],
-        });
+        return Json(DisplayMessage { status: 400 });
     };
 
     // Convert image to a format compatible with the e-ink display
@@ -62,8 +68,5 @@ async fn post_display(mut multipart: Multipart) -> Json<DisplayMessage> {
 
     tokio::fs::write("output.bin", &bin_bytes).await.unwrap();
 
-    Json(DisplayMessage {
-        status: 200,
-        image_bmp: bin_bytes,
-    })
+    Json(DisplayMessage { status: 200 })
 }
