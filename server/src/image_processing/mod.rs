@@ -1,49 +1,86 @@
-use image::{
-    ImageBuffer, ImageFormat, ImageResult, Luma,
-    imageops::{BiLevel, FilterType},
-};
+use image::{ImageBuffer, ImageFormat, ImageResult, Luma, imageops::FilterType};
 
 use std::io::Cursor;
 
 pub fn image_to_bin(image_bytes: &[u8]) -> Vec<u8> {
     let image = image::load_from_memory(&image_bytes)
         .unwrap()
-        .resize_to_fill(800, 480, FilterType::Nearest);
+        .resize_exact(800, 480, FilterType::Nearest)
+        .to_luma8();
 
-    let mut grayscale_image = image.to_luma8();
+    let mut img = image.clone();
 
-    image::imageops::dither(&mut grayscale_image, &BiLevel);
+    floyd_steinberg(&mut img);
 
     // Write to fs for debugging
-    bmp_to_fs(&grayscale_image).unwrap_or_else(|e| {
+    bmp_to_fs(&img).unwrap_or_else(|e| {
         eprintln!("Failed to write to filesystem: {}", e);
     });
 
-    let raw_image = grayscale_image.into_raw();
-    let packed = pack_bytes(&raw_image);
+    pack_bytes(&img)
+}
 
-    packed
+// Source: https://en.wikipedia.org/wiki/Floyd%E2%80%93Steinberg_dithering
+fn floyd_steinberg(img: &mut ImageBuffer<Luma<u8>, Vec<u8>>) {
+    let (width, height) = img.dimensions();
+
+    for y in 0..height {
+        for x in 0..width {
+            let old_pixel = img.get_pixel(x, y)[0] as i16;
+            let new_pixel = if old_pixel < 128 { 0 } else { 255 };
+            let quant_error = old_pixel - new_pixel;
+
+            img.put_pixel(x, y, Luma([new_pixel as u8]));
+
+            if x + 1 < width {
+                let p = img.get_pixel(x + 1, y)[0] as i16 + (quant_error * 7 / 16).clamp(0, 255);
+                img.put_pixel(x + 1, y, Luma([p as u8]))
+            }
+            if x > 0 && y + 1 < height {
+                let p =
+                    img.get_pixel(x - 1, y + 1)[0] as i16 + (quant_error * 3 / 16).clamp(0, 255);
+                img.put_pixel(x - 1, y + 1, Luma([p as u8]))
+            }
+            if y + 1 < height {
+                let p = img.get_pixel(x, y + 1)[0] as i16 + (quant_error * 5 / 16).clamp(0, 255);
+                img.put_pixel(x, y + 1, Luma([p as u8]));
+            }
+            if x + 1 < width && y + 1 < height {
+                let p =
+                    img.get_pixel(x + 1, y + 1)[0] as i16 + (quant_error * 1 / 16).clamp(0, 255);
+                img.put_pixel(x + 1, y + 1, Luma([p as u8]));
+            }
+        }
+    }
 }
 
 // Convert 1 byte/pixel to 8 pixels/byte
-fn pack_bytes(pixels: &[u8]) -> Vec<u8> {
-    let mut packed = Vec::with_capacity((pixels.len() + 7) / 8);
+fn pack_bytes(img: &ImageBuffer<Luma<u8>, Vec<u8>>) -> Vec<u8> {
+    let (width, height) = img.dimensions();
+    let mut res = Vec::with_capacity((width * height / 8) as usize);
 
-    for _ in pixels.chunks(800) {
-        for chunk in pixels.chunks(8) {
-            let mut byte = 0u8;
+    for y in 0..height {
+        let mut byte = 0u8;
+        let mut bit = 7;
 
-            for (i, &p) in chunk.iter().enumerate() {
-                if p == 1 {
-                    byte |= 1 << (7 - i);
-                }
+        for x in 0..width {
+            let pixel = img.get_pixel(x, y)[0];
+
+            if pixel < 128 {
+                byte |= 1 << bit;
             }
 
-            packed.push(byte);
+            if bit == 0 {
+                res.push(byte);
+                byte = 0;
+                bit = 7;
+            } else {
+                bit -= 1;
+            }
         }
     }
 
-    packed
+    res
 }
 
 fn bmp_to_fs(image: &ImageBuffer<Luma<u8>, Vec<u8>>) -> ImageResult<()> {
