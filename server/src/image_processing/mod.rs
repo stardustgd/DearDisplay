@@ -1,26 +1,21 @@
 use image::{
-    ImageBuffer, ImageFormat, ImageResult, Luma,
+    ImageBuffer, ImageError, ImageFormat, ImageResult, Luma,
     imageops::{BiLevel, FilterType},
 };
 
 use std::io::Cursor;
 
-pub fn image_to_bin(image_bytes: &[u8]) -> Vec<u8> {
-    let image =
-        image::load_from_memory(&image_bytes)
-            .unwrap()
-            .resize_exact(800, 480, FilterType::Nearest);
+pub fn image_to_bin(image_bytes: &[u8]) -> Result<Vec<u8>, ImageError> {
+    let image = image::load_from_memory(&image_bytes)?.resize_exact(800, 480, FilterType::Nearest);
 
     let mut grayscale_image = image.to_luma8();
 
     image::imageops::dither(&mut grayscale_image, &BiLevel);
 
     // Write to fs for debugging
-    bmp_to_fs(&grayscale_image).unwrap_or_else(|e| {
-        eprintln!("Failed to write to filesystem: {}", e);
-    });
+    bmp_to_fs(&grayscale_image)?;
 
-    pack_bytes(&grayscale_image)
+    Ok(pack_bytes(&grayscale_image))
 }
 
 // Convert 1 byte/pixel to 8 pixels/byte
@@ -60,8 +55,7 @@ fn bmp_to_fs(image: &ImageBuffer<Luma<u8>, Vec<u8>>) -> ImageResult<()> {
     let mut buf = Vec::new();
 
     image.write_to(&mut Cursor::new(&mut buf), ImageFormat::Bmp)?;
-
-    std::fs::write("output.bmp", &buf).unwrap();
+    std::fs::write("output.bmp", &buf)?;
 
     Ok(())
 }

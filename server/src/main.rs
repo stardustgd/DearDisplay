@@ -2,6 +2,7 @@ use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::info;
 
+mod error;
 mod http;
 mod image_processing;
 
