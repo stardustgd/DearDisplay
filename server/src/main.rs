@@ -15,7 +15,10 @@ async fn main() {
         .allow_methods(Any)
         .allow_headers(Any);
 
-    let routes = Router::new().merge(http::display::routes()).layer(cors);
+    let routes = Router::new()
+        .merge(http::display::routes())
+        .merge(http::screenshot::routes())
+        .layer(cors);
 
     info!("Running on localhost:4000");
 
