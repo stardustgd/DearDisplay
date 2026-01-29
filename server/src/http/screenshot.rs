@@ -35,8 +35,7 @@ async fn screenshot_handler() -> Result<Response<Body>, ApiError> {
     element.scroll_into_view()?;
 
     let box_model = element.get_box_model()?;
-    let mut viewport = box_model.margin_viewport();
-    viewport.scale = 1.0;
+    let viewport = box_model.margin_viewport();
 
     let screenshot = tab.capture_screenshot(
         CaptureScreenshotFormatOption::Png,
