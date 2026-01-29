@@ -11,10 +11,10 @@ pub fn routes() -> Router {
 }
 
 async fn screenshot_handler() -> Result<Response<Body>, ApiError> {
-    let browser = Browser::default()?;
+    let browser = Browser::connect(format!("ws://chromium:3000"))?;
 
     let tab = browser.new_tab_with_options(CreateTarget {
-        url: format!("http://192.168.1.199:3000/screen"),
+        url: format!("http://web:3000/screen"),
         left: None,
         top: None,
         width: Some(800),

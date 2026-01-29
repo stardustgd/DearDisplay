@@ -10,3 +10,19 @@ services:
       - "4000:4000"
     environment:
       - RUST_LOG=debug
+    depends_on:
+      - chromium
+      - web
+
+  chromium:
+    image: browserless/chrome:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - MAX_CONCURRENT_SESSIONS=5
+      - PREBOOT_CHROME=true
+      - XDG_CONFIG_HOME=/tmp/.chromium-config
+      - XDG_CACHE_HOME=/tmp/.chromium-cache
+      - TZ=America/Los_Angeles
+    tmpfs:
+      - /tmp:rw,size=1g
