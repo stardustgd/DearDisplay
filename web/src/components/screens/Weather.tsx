@@ -1,6 +1,6 @@
 import { WeatherResponse, Location, CurrentWeather, ForecastDay } from '@/types'
 import Image from 'next/image'
-import { epochToDateString } from '@/lib'
+import { epochToDateString, getWeatherIcon } from '@/lib'
 
 type WeatherMainProps = {
   location: Location
@@ -21,8 +21,8 @@ function WeatherMain({ location, data }: WeatherMainProps) {
 
   return (
     <div className="flex flex-row">
-      <div className="flex w-1/2 items-center">
-        <Image src={`http:${condition.icon}`} alt={condition.text} width={96} height={96} />
+      <div className="flex w-1/4 items-center">
+        <Image src={getWeatherIcon(condition.icon)} alt={condition.text} width={128} height={128} />
       </div>
       <div className="w-1/2 flex flex-col items-center">
         <h1 className="text-6xl">{data.temp_f}</h1>
@@ -50,14 +50,11 @@ function WeatherCard({ data }: WeatherCardProps) {
   const condition = data.day.condition
   const date = epochToDateString(data.date_epoch)
 
-  console.log(date)
-
-  // TODO: Adjust CSS of Image icon
   return (
     <div className="flex flex-col w-full">
       <div className="flex flex-row">
         <div className="flex w-1/4 items-center">
-          <Image src={`http:${condition.icon}`} alt={condition.text} width={32} height={32} />
+          <Image src={getWeatherIcon(condition.icon)} alt={condition.text} width={128} height={128} />
         </div>
         <div className="w-1/2 flex flex-col items-center">
           <h1 className="text-lg">{date.dayString}</h1>

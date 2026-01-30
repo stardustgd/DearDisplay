@@ -24,3 +24,7 @@ export function epochToDateString(epoch: number) {
     day: date.getDate(),
   }
 }
+
+export function getWeatherIcon(icon: string, size: 64 | 128 = 128) {
+  return `http:${icon.replace(/\/\d+x\d+\//, `/${size}x${size}/`)}`
+}
