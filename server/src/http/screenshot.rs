@@ -10,7 +10,7 @@ pub fn routes() -> Router {
     Router::new().route("/api/screenshot", get(screenshot_handler))
 }
 
-async fn screenshot_handler() -> Result<Response<Body>, ApiError> {
+pub async fn screenshot_handler() -> Result<Response<Body>, ApiError> {
     let browser = Browser::connect(format!("ws://chromium:3000"))?;
 
     let tab = browser.new_tab_with_options(CreateTarget {
@@ -44,7 +44,7 @@ async fn screenshot_handler() -> Result<Response<Body>, ApiError> {
         true,
     )?;
 
-    tokio::fs::write("screenshot.png", &screenshot).await?;
+    tokio::fs::write("/tmp/uploaded.png", &screenshot).await?;
 
     Ok(Response::builder()
         .status(StatusCode::OK)
