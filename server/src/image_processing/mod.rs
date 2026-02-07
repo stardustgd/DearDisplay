@@ -55,7 +55,7 @@ fn bmp_to_fs(image: &ImageBuffer<Luma<u8>, Vec<u8>>) -> ImageResult<()> {
     let mut buf = Vec::new();
 
     image.write_to(&mut Cursor::new(&mut buf), ImageFormat::Bmp)?;
-    std::fs::write("output.bmp", &buf)?;
+    std::fs::write("/tmp/output.bmp", &buf)?;
 
     Ok(())
 }

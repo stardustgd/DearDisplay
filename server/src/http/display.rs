@@ -23,10 +23,10 @@ struct DisplayMessage {
 async fn get_display() -> Result<impl IntoResponse, ApiError> {
     screenshot_handler().await?;
 
-    let file = tokio::fs::read("uploaded.png").await?;
+    let file = tokio::fs::read("/tmp/uploaded.png").await?;
     let bin_bytes = image_to_bin(&file)?;
 
-    tokio::fs::write("output.bin", &bin_bytes).await?;
+    tokio::fs::write("/tmp/output.bin", &bin_bytes).await?;
 
     let file_length = bin_bytes.len().to_string();
 
@@ -43,7 +43,7 @@ async fn post_display(mut multipart: Multipart) -> Result<Json<DisplayMessage>, 
     // Get image bytes
     while let Some(field) = multipart.next_field().await? {
         let bytes = field.bytes().await?;
-        tokio::fs::write("uploaded.png", &bytes).await?;
+        tokio::fs::write("/tmp/uploaded.png", &bytes).await?;
         image_bytes = Some(bytes.to_vec());
     }
 
@@ -55,7 +55,7 @@ async fn post_display(mut multipart: Multipart) -> Result<Json<DisplayMessage>, 
     // Convert image to a format compatible with the e-ink display
     let bin_bytes = image_to_bin(&image_bytes)?;
 
-    tokio::fs::write("output.bin", &bin_bytes).await?;
+    tokio::fs::write("/tmp/output.bin", &bin_bytes).await?;
 
     Ok(Json(DisplayMessage { status: 200 }))
 }

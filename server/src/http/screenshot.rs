@@ -44,7 +44,7 @@ pub async fn screenshot_handler() -> Result<Response<Body>, ApiError> {
         true,
     )?;
 
-    tokio::fs::write("uploaded.png", &screenshot).await?;
+    tokio::fs::write("/tmp/uploaded.png", &screenshot).await?;
 
     Ok(Response::builder()
         .status(StatusCode::OK)
