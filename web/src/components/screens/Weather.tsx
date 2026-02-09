@@ -25,7 +25,7 @@ function WeatherMain({ location, data }: WeatherMainProps) {
         <Image src={getWeatherIcon(condition.icon)} alt={condition.text} width={128} height={128} />
       </div>
       <div className="w-1/2 flex flex-col items-center">
-        <h1 className="text-6xl">{data.temp_f}</h1>
+        <h1 className="text-6xl">{data.temp_f}°</h1>
         <h2 className="text-3xl">
           {location.name}, {location.region}
         </h2>
@@ -38,7 +38,7 @@ function WeatherMain({ location, data }: WeatherMainProps) {
 // Footer of the weather component, to show weather for the next 5 days
 function WeatherFooter({ data }: WeatherFooterProps) {
   return (
-    <div className="flex flex-row gap-4">
+    <div className="flex flex-row w-full">
       {data.slice(1).map((day: ForecastDay, index) => (
         <WeatherCard data={day} key={index} />
       ))}
@@ -57,7 +57,7 @@ function WeatherCard({ data }: WeatherCardProps) {
           <Image src={getWeatherIcon(condition.icon)} alt={condition.text} width={128} height={128} />
         </div>
         <div className="w-1/2 flex flex-col items-center">
-          <h1 className="text-lg">{date.dayString}</h1>
+          <h1 className="text-lg font-bold">{date.dayString}</h1>
           <h2 className="text-md">
             {date.month} {date.day}
           </h2>
