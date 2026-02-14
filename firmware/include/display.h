@@ -6,10 +6,10 @@
 
 #define EPD_MODEL GxEPD2_750_T7
 
-const int16_t EPD_CS = 5;
-const int16_t EPD_DC = 17;
-const int16_t EPD_RST = 16;
-const int16_t EPD_BUSY = 4;
+const int16_t EPD_CS = 15;
+const int16_t EPD_DC = 27;
+const int16_t EPD_RST = 26;
+const int16_t EPD_BUSY = 25;
 const uint32_t EPD_SERIAL_BITRATE = 115200;
 const bool EPD_INITIAL= false;
 const uint16_t EPD_RESET_DURATION = 2;

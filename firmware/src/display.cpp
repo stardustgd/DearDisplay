@@ -7,6 +7,7 @@ Display::Display()
     : display(EPD_MODEL(EPD_CS, EPD_DC, EPD_RST, EPD_BUSY)) {}
 
 void Display::init() {
+  SPI.begin(13, 12, 14, 15);
   display.init(EPD_SERIAL_BITRATE, EPD_INITIAL, EPD_RESET_DURATION, EPD_PULLDOWN_RST_MODE);
   Serial.println("display initialized");
 } 
