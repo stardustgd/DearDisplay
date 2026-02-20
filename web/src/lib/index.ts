@@ -26,5 +26,5 @@ export function epochToDateString(epoch: number) {
 }
 
 export function getWeatherIcon(icon: string, size: 64 | 128 = 128) {
-  return `http:${icon.replace(/\/\d+x\d+\//, `/${size}x${size}/`)}`
+  return `https:${icon.replace(/\/\d+x\d+\//, `/${size}x${size}/`)}`
 }
